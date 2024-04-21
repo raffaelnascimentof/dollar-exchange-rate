@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/raffaelnascimentof/dollar-exchange-rate/config"
 )
 
 type QuotationResponse struct {
@@ -25,6 +27,7 @@ type ResponseError struct {
 }
 
 func main() {
+	config.InitDB()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/cotacao", CotacaoHandler)
 	http.ListenAndServe(":8080", mux)
@@ -73,6 +76,8 @@ func getQuotation(w http.ResponseWriter, r *http.Request, ctx context.Context) (
 		return nil, createErrorResponse("Internal server error", http.StatusInternalServerError)
 	}
 
+	saveQuotationExchange(quotation.Infos.Bid)
+
 	return &quotation, createErrorResponse("", http.StatusOK)
 }
 
@@ -82,4 +87,8 @@ func createErrorResponse(err string, code int) ResponseError {
 		Code:    code,
 	}
 	return responseError
+}
+
+func saveQuotationExchange(exchangeQuotation string) {
+	config.InsertQuotationValue(exchangeQuotation)
 }
