@@ -11,10 +11,22 @@ import (
 )
 
 type QuotationResponse struct {
-	Infos Quotation `json:"USDBRL"`
+	USDBRL struct {
+		Code       string `json:"code"`
+		Codein     string `json:"codein"`
+		Name       string `json:"name"`
+		High       string `json:"high"`
+		Low        string `json:"low"`
+		VarBid     string `json:"varBid"`
+		PctChange  string `json:"pctChange"`
+		Bid        string `json:"bid"`
+		Ask        string `json:"ask"`
+		Timestamp  string `json:"timestamp"`
+		CreateDate string `json:"create_date"`
+	} `json:"USDBRL"`
 }
 
-type Quotation struct {
+type QuotationDTO struct {
 	Name   string `json:"name"`
 	Code   string `json:"code"`
 	CodeIn string `json:"codein"`
@@ -50,7 +62,7 @@ func CotacaoHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(quotation)
 }
 
-func getQuotation(w http.ResponseWriter, r *http.Request, ctx context.Context) (*QuotationResponse, ResponseError) {
+func getQuotation(w http.ResponseWriter, r *http.Request, ctx context.Context) (*QuotationDTO, ResponseError) {
 	request, err := http.NewRequestWithContext(ctx, "GET", "https://economia.awesomeapi.com.br/json/last/USD-BRL", nil)
 	if err != nil {
 		return nil, createErrorResponse("Internal server error", http.StatusInternalServerError)
@@ -70,15 +82,16 @@ func getQuotation(w http.ResponseWriter, r *http.Request, ctx context.Context) (
 		return nil, createErrorResponse("Internal server error", http.StatusInternalServerError)
 	}
 
-	var quotation QuotationResponse
-	error := json.Unmarshal(responseData, &quotation)
+	var quotationResponse QuotationResponse
+	error := json.Unmarshal(responseData, &quotationResponse)
 	if error != nil {
 		return nil, createErrorResponse("Internal server error", http.StatusInternalServerError)
 	}
 
-	saveQuotationExchange(quotation.Infos.Bid)
+	quotationDTO := convertToQuotationDTO(quotationResponse)
+	saveQuotationExchange(quotationDTO.Bid)
 
-	return &quotation, createErrorResponse("", http.StatusOK)
+	return quotationDTO, createErrorResponse("", http.StatusOK)
 }
 
 func createErrorResponse(err string, code int) ResponseError {
@@ -91,4 +104,15 @@ func createErrorResponse(err string, code int) ResponseError {
 
 func saveQuotationExchange(exchangeQuotation string) {
 	config.InsertQuotationValue(exchangeQuotation)
+}
+
+func convertToQuotationDTO(quotationResponse QuotationResponse) *QuotationDTO {
+	quotationDTO := QuotationDTO{
+		Name:   quotationResponse.USDBRL.Name,
+		Code:   quotationResponse.USDBRL.Code,
+		CodeIn: quotationResponse.USDBRL.Codein,
+		Bid:    quotationResponse.USDBRL.Bid,
+	}
+
+	return &quotationDTO
 }
