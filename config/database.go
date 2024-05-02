@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -51,7 +52,11 @@ func InsertQuotationValue(quotationValue string) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(quotationValue, getCurrentDate())
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*10)
+	defer cancel()
+
+	_, err = stmt.ExecContext(ctx, quotationValue, getCurrentDate())
 	if err != nil {
 		panic(err.Error())
 	}
