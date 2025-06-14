@@ -29,7 +29,7 @@ func CotacaoHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*200)
 	defer cancel()
 
-	quotation, responseError := getQuotation(w, r, ctx)
+	quotation, responseError := getQuotation(ctx)
 	if responseError.Message != "" {
 		jsonResponse, _ := json.Marshal(responseError)
 		http.Error(w, string(jsonResponse), responseError.Code)
@@ -41,7 +41,7 @@ func CotacaoHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(quotation)
 }
 
-func getQuotation(w http.ResponseWriter, r *http.Request, ctx context.Context) (*dto.QuotationDTO, responseerror.ResponseError) {
+func getQuotation(ctx context.Context) (*dto.QuotationDTO, responseerror.ResponseError) {
 	request, err := http.NewRequestWithContext(ctx, "GET", URL, nil)
 	if err != nil {
 		return nil, responseerror.CreateError("Internal server error", http.StatusInternalServerError)

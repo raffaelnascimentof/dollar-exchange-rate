@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func OpenConnection() (*sql.DB, error) {
-	var connInformation = "host=localhost port=5432 user=root password=root dbname=dollar-quotation sslmode=disable"
-	database, err := sql.Open("postgres", connInformation)
+	database, err := sql.Open("sqlite3", "./quotation.db")
 	if err != nil {
 		fmt.Println("not found database")
 	}
@@ -25,7 +24,7 @@ func InitDB() {
 	}
 	defer database.Close()
 
-	sql := `CREATE TABLE IF NOT EXISTS quotation (id SERIAL PRIMARY KEY ,name TEXT, code TEXT, codein TEXT, value TEXT, data TEXT)`
+	sql := `CREATE TABLE IF NOT EXISTS quotation (id INTEGER PRIMARY KEY AUTOINCREMENT ,name TEXT, code TEXT, codein TEXT, value TEXT, data TEXT)`
 	_, err = database.Exec(sql)
 	if err != nil {
 		log.Println("Table 'quotation' not created: " + err.Error())

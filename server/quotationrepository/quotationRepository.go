@@ -19,7 +19,7 @@ func Save(quotationDomain *domain.QuotationDomain) {
 	}
 	defer database.Close()
 
-	stmt, err := database.Prepare(`INSERT INTO quotation (name, code, codein, value, data) VALUES ($1, $2, $3, $4, $5)`)
+	stmt, err := database.Prepare(`INSERT INTO quotation (name, code, codein, value, data) VALUES (?, ?, ?, ?, ?)`)
 	if err != nil {
 		log.Println("Erro prepare SQL")
 	}

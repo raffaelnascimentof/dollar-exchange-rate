@@ -15,6 +15,5 @@ Criterios de aceite:
 
 - Clonar repositorio
 - Baixar dependencias (go mod tidy)
-- Rodar arquivo do docker-compose para criar banco de dados (docker-compose up -d)
 - Rodar server.go (go run server.go)
 - Rodar client.go (go run client.go)
